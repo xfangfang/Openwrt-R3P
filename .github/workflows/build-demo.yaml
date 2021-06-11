@@ -31,13 +31,6 @@ jobs:
         ls -lah
         pwd
 
-    - name: SSH connection to Actions
-      uses: P3TERX/ssh2actions@v1.0.0
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
-      env:
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-
     - name: Build
       id: compile
       run: |
@@ -47,13 +40,21 @@ jobs:
         mkdir -p bin && tar --strip-components 2 -C bin -xzvf mpv-latest.tar.gz mpv.app/Contents/MacOS
         python setup.py py2app
         export VERSION=`cat .version`
+        cd dist && zip -r Macast_v${VERSION}.zip Macast.app
 
     - name: Upload dist
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v2
       if: steps.compile.outputs.status == 'success'
       with:
         name: Macast_v${{ env.VERSION }}
-        path: dist
+        path: dist/Macast_v${{ env.VERSION }}.zip
+
+    - name: SSH connection to Actions
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
 #     - name: Organize files
 #       id: organize
