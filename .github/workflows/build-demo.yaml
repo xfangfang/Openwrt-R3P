@@ -40,6 +40,7 @@ jobs:
         mkdir -p bin && tar --strip-components 2 -C bin -xzvf mpv-latest.tar.gz mpv.app/Contents/MacOS
         python setup.py py2app
         export VERSION=`cat .version`
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
         cd dist && zip -r Macast_v${VERSION}.zip Macast.app
 
     - name: Upload dist
