@@ -34,12 +34,12 @@ jobs:
     - name: Build
       id: compile
       run: |
-        pip install -r requirements.txt
-        pip install py2app
-        pip install setuptools==44.0.0
+        pip3 install -r requirements.txt
+        pip3 install py2app
+        # pip3 install setuptools==44.0.0
         wget https://laboratory.stolendata.net/~djinn/mpv_osx/mpv-latest.tar.gz
         mkdir -p bin && tar --strip-components 2 -C bin -xzvf mpv-latest.tar.gz mpv.app/Contents/MacOS
-        python setup.py py2app
+        python3 setup.py py2app
         cp -R bin dist/Macast.app/Contents/Resources/
         export VERSION=`cat .version`
         echo "DIST=Macast_v$VERSION.zip" >> $GITHUB_ENV
