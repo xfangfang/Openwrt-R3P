@@ -39,6 +39,7 @@ jobs:
         wget https://laboratory.stolendata.net/~djinn/mpv_osx/mpv-latest.tar.gz
         mkdir -p bin && tar --strip-components 2 -C bin -xzvf mpv-latest.tar.gz mpv.app/Contents/MacOS
         python setup.py py2app
+        cp -R bin dist/Macast.app/Contents/Resources/
         export VERSION=`cat .version`
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         cd dist && zip -r Macast_v${VERSION}.zip Macast.app
@@ -46,7 +47,7 @@ jobs:
     - name: Upload dist
       uses: actions/upload-artifact@v2
       with:
-        name: Macast_v${{ env.VERSION }}
+        name: Macast_v${{ env.VERSION }}.zip
         path: dist/Macast_v${{ env.VERSION }}.zip
 
     - name: SSH connection to Actions
