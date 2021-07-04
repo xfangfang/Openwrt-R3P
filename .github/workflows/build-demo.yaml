@@ -31,9 +31,7 @@ jobs:
         repository: 'xfangfang/Macast'
 
     - name: install create-dmg
-      run: |
-        curl -o create-dmg https://raw.githubusercontent.com/create-dmg/create-dmg/master/create-dmg
-        chmod u+x create-dmg
+      run: brew install create-dmg
 
     - name: Build
       id: compile
@@ -49,7 +47,7 @@ jobs:
         echo "DIST_ZIP=Macast-v$VERSION.zip" >> $GITHUB_ENV
         echo "DIST_DMG=Macast-v${VERSION}-Installer.dmg" >> $GITHUB_ENV
         echo "VERSION=v$VERSION" >> $GITHUB_ENV
-        # ./create-dmg --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "Macast.app" 200 190  --hide-extension "Macast.app" --app-drop-link 600 185  --volname "Macast-v${VERSION} Installer" Macast-v${VERSION}-Installer.dmg "dist/"
+        create-dmg --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "Macast.app" 200 190  --hide-extension "Macast.app" --app-drop-link 600 185  --volname "Macast-v${VERSION} Installer" Macast-v${VERSION}-Installer.dmg "dist/"
         cd dist && zip -r Macast_v${VERSION}.zip Macast.app
         echo "::set-output name=status::success"
         
