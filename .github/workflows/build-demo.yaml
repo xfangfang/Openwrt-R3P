@@ -48,9 +48,9 @@ jobs:
         echo "DIST_DMG=Macast-v${VERSION}-Installer.dmg" >> $GITHUB_ENV
         echo "VERSION=v$VERSION" >> $GITHUB_ENV
         create-dmg --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "Macast.app" 200 190  --hide-extension "Macast.app" --app-drop-link 600 185  --volname "Macast-v${VERSION} Installer" Macast-v${VERSION}-Installer.dmg "dist/"
-        cd dist && zip -r Macast_v${VERSION}.zip Macast.app
+        # cd dist && zip -r Macast_v${VERSION}.zip Macast.app
         echo "::set-output name=status::success"
-        
+
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
       if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
@@ -62,11 +62,10 @@ jobs:
       uses: actions/upload-artifact@v2
       if: steps.compile.outputs.status == 'success'
       with:
-        name: Macast Build
+        name: ${{ env.DIST_DMG }}
         path: |
-          dist/${{ env.DIST_ZIP }}
           ${{ env.DIST_DMG }}
-          
+
     - name: Generate release body
       id: tag
       run: |
@@ -83,5 +82,4 @@ jobs:
         tag_name: ${{ env.VERSION }}
         body_path: release.txt
         files: |
-          dist/${{ env.DIST_ZIP }}
           ${{ env.DIST_DMG }}
