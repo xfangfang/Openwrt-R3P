@@ -49,9 +49,16 @@ jobs:
         echo "DIST_ZIP=Macast-v$VERSION.zip" >> $GITHUB_ENV
         echo "DIST_DMG=Macast-v${VERSION}-Installer.dmg" >> $GITHUB_ENV
         echo "VERSION=v$VERSION" >> $GITHUB_ENV
-        ./create-dmg --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "Macast.app" 200 190  --hide-extension "Macast.app" --app-drop-link 600 185  --volname "Macast-v${VERSION} Installer" Macast-v${VERSION}-Installer.dmg "dist/"
+        # ./create-dmg --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "Macast.app" 200 190  --hide-extension "Macast.app" --app-drop-link 600 185  --volname "Macast-v${VERSION} Installer" Macast-v${VERSION}-Installer.dmg "dist/"
         cd dist && zip -r Macast_v${VERSION}.zip Macast.app
         echo "::set-output name=status::success"
+        
+    - name: SSH connection to Actions
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
     - name: Upload dist
       uses: actions/upload-artifact@v2
@@ -80,10 +87,3 @@ jobs:
         files: |
           dist/${{ env.DIST_ZIP }}
           ${{ env.DIST_DMG }}
-
-    - name: SSH connection to Actions
-      uses: P3TERX/ssh2actions@v1.0.0
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
-      env:
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
