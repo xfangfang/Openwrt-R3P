@@ -11,6 +11,10 @@ on:
         description: 'SSH connection to Actions'
         required: false
         default: 'false'
+      release:
+        description: 'Push a new release'
+        required: false
+        default: 'false'
 
 env:
   REPO_URL: https://github.com/xfangfang/Macast
@@ -26,24 +30,26 @@ jobs:
       with:
         repository: 'xfangfang/Macast'
 
-    - name: debug
+    - name: install create-dmg
       run: |
-        ls -lah
-        pwd
+        curl -o create-dmg https://raw.githubusercontent.com/create-dmg/create-dmg/master/create-dmg
+        chmod u+x create-dmg
 
     - name: Build
       id: compile
       run: |
-        pip3 install -r requirements.txt
+        pip3 install -r requirements/drawin.txt
         pip3 install py2app
-        # pip3 install setuptools==44.0.0
         wget https://laboratory.stolendata.net/~djinn/mpv_osx/mpv-latest.tar.gz
         mkdir -p bin && tar --strip-components 2 -C bin -xzvf mpv-latest.tar.gz mpv.app/Contents/MacOS
+        msgfmt -o i18n/zh_CN/LC_MESSAGES/macast.mo i18n/zh_CN/LC_MESSAGES/macast.po
         python3 setup.py py2app
         cp -R bin dist/Macast.app/Contents/Resources/
         export VERSION=`cat .version`
-        echo "DIST=Macast_v$VERSION.zip" >> $GITHUB_ENV
+        echo "DIST_ZIP=Macast-v$VERSION.zip" >> $GITHUB_ENV
+        echo "DIST_DMG=Macast-v${VERSION}-Installer.dmg" >> $GITHUB_ENV
         echo "VERSION=v$VERSION" >> $GITHUB_ENV
+        ./create-dmg --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "Macast.app" 200 190  --hide-extension "Macast.app" --app-drop-link 600 185  --volname "Macast-v${VERSION} Installer" Macast-v${VERSION}-Installer.dmg "dist/"
         cd dist && zip -r Macast_v${VERSION}.zip Macast.app
         echo "::set-output name=status::success"
 
@@ -51,27 +57,30 @@ jobs:
       uses: actions/upload-artifact@v2
       if: steps.compile.outputs.status == 'success'
       with:
-        name: ${{ env.DIST }}
-        path: dist/${{ env.DIST }}
-
-    - name: Generate release tag
+        name: Macast Build
+        path: |
+          dist/${{ env.DIST_ZIP }}
+          ${{ env.DIST_DMG }}
+          
+    - name: Generate release body
       id: tag
       run: |
-        echo "::set-output name=release_tag::Macast_${VERSION}"
         touch release.txt
-        echo "auto compile" >> release.txt
+        echo "This release is built by github-action." >> release.txt
         echo "::set-output name=status::success"
 
     - name: Upload Macast to release
       uses: softprops/action-gh-release@v1
-      if: steps.tag.outputs.status == 'success' && !cancelled()
+      if: github.event.inputs.release == 'true' && github.event.inputs.release  != 'false' && steps.tag.outputs.status == 'success' && !cancelled()
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.tag.outputs.release_tag }}
+        tag_name: ${{ env.VERSION }}
         body_path: release.txt
-        files: dist/${{ env.DIST }}
-        
+        files: |
+          dist/${{ env.DIST_ZIP }}
+          ${{ env.DIST_DMG }}
+
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
       if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
