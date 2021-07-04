@@ -21,9 +21,31 @@ env:
   REPO_BRANCH: main
 
 jobs:
-  build:
+  build-nt:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        repository: 'xfangfang/Macast'
+    - name: Build
+      id: compile
+      run: |
+        pip3 install -r requirements/common.txt
+        pip3 install pyinstaller
+        $client = new-object System.Net.WebClient
+        $client.DownloadFile('https://nchc.dl.sourceforge.net/project/mpv-player-windows/stable/mpv-0.33.0-x86_64.7z','mpv.7z')
+        echo "::set-output name=status::success"
+        
+    - name: Upload dist
+      uses: actions/upload-artifact@v2
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: mpv.7z
+        path: mpv.7z
+    
+  build-darwin:
     runs-on: macos-10.15
-
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -44,11 +66,9 @@ jobs:
         python3 setup.py py2app
         cp -R bin dist/Macast.app/Contents/Resources/
         export VERSION=`cat .version`
-        echo "DIST_ZIP=Macast-v$VERSION.zip" >> $GITHUB_ENV
         echo "DIST_DMG=Macast-v${VERSION}-Installer.dmg" >> $GITHUB_ENV
         echo "VERSION=v$VERSION" >> $GITHUB_ENV
         create-dmg --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "Macast.app" 200 190  --hide-extension "Macast.app" --app-drop-link 600 185  --volname "Macast-v${VERSION} Installer" Macast-v${VERSION}-Installer.dmg "dist/"
-        # cd dist && zip -r Macast_v${VERSION}.zip Macast.app
         echo "::set-output name=status::success"
 
     - name: SSH connection to Actions
@@ -63,8 +83,7 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       with:
         name: ${{ env.DIST_DMG }}
-        path: |
-          ${{ env.DIST_DMG }}
+        path: ${{ env.DIST_DMG }}
 
     - name: Generate release body
       id: tag
@@ -81,5 +100,4 @@ jobs:
       with:
         tag_name: ${{ env.VERSION }}
         body_path: release.txt
-        files: |
-          ${{ env.DIST_DMG }}
+        files: ${{ env.DIST_DMG }}
