@@ -30,8 +30,11 @@ jobs:
         with:
           repository: 'xfangfang/Macast'
           
-      - name: Download
+      - uses: actions/download-artifact@v2
+          
+      - name: Version
         run: |
+          ls -lah
           $VERSION=cat .version
           echo "DIST_DMG=Macast-v${VERSION}-Installer.dmg" >> $GITHUB_ENV
           echo "DIST_EXE=Macast-v${VERSION}.exe" >> $GITHUB_ENV
