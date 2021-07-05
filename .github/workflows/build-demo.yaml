@@ -98,25 +98,6 @@ jobs:
       with:
         name: ${{ env.DIST_EXE_DEBUG }}
         path: ${{ env.DIST_EXE_DEBUG }}
-
-    - name: Upload Macast to release
-      uses: softprops/action-gh-release@v1
-      if: github.event.inputs.release == 'true' && github.event.inputs.release  != 'false' && steps.tag.outputs.status == 'success' && !cancelled()
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.VERSION }}
-        files: ${{ env.DIST_EXE }}
-        
-    - name: Upload Macast to release debug
-      uses: softprops/action-gh-release@v1
-      if: github.event.inputs.release == 'true' && github.event.inputs.release  != 'false' && steps.tag.outputs.status == 'success' && !cancelled()
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.VERSION }}
-        body_path: release.txt
-        files: ${{ env.DIST_EXE_DEBUG }}
     
   build-darwin:
     runs-on: macos-10.15
