@@ -35,7 +35,7 @@ jobs:
       - name: Version
         run: |
           ls -lah
-          $VERSION=`cat .version`
+          export VERSION=`cat .version`
           echo "VERSION=v$VERSION" >> $GITHUB_ENV
           echo "DIST_DMG=Macast-v${VERSION}-Installer.dmg" >> $GITHUB_ENV
           echo "DIST_EXE=Macast-v${VERSION}.exe" >> $GITHUB_ENV
