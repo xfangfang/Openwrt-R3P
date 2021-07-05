@@ -49,7 +49,7 @@ jobs:
         echo "VERSION=v${VERSION}" >> $GITHUB_ENV
         pyinstaller --noconfirm -F -w --additional-hooks-dir=. --add-data=".version;." --add-data="macast/xml/*;macast/xml"  --add-data="i18n/zh_CN/LC_MESSAGES/*.mo;i18n/zh_CN/LC_MESSAGES" --add-data="assets/*;assets" --add-binary="bin/mpv.exe;bin" --icon=assets/icon.ico Macast.py
         cp dist/Macast.exe Macast-v${VERSION}.exe
-        pyinstaller --noconfirm -F -w --additional-hooks-dir=. --add-data=".version;." --add-data="macast/xml/*;macast/xml"  --add-data="i18n/zh_CN/LC_MESSAGES/*.mo;i18n/zh_CN/LC_MESSAGES" --add-data="assets/*;assets" --add-binary="bin/mpv.exe;bin" --icon=assets/icon.ico Macast.py
+        pyinstaller --noconfirm -F --additional-hooks-dir=. --add-data=".version;." --add-data="macast/xml/*;macast/xml"  --add-data="i18n/zh_CN/LC_MESSAGES/*.mo;i18n/zh_CN/LC_MESSAGES" --add-data="assets/*;assets" --add-binary="bin/mpv.exe;bin" --icon=assets/icon.ico Macast.py
         cp dist/Macast.exe Macast-v${VERSION}-debug.exe
         echo "::set-output name=status::success"
 
@@ -75,6 +75,15 @@ jobs:
       with:
         tag_name: ${{ env.VERSION }}
         files: ${{ env.DIST_EXE }}
+        
+    - name: Upload Macast to release debug
+      uses: softprops/action-gh-release@v1
+      if: github.event.inputs.release == 'true' && github.event.inputs.release  != 'false' && steps.tag.outputs.status == 'success' && !cancelled()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.VERSION }}
+        files: ${{ env.DIST_EXE_DEBUG }}
     
   build-darwin:
     runs-on: macos-10.15
