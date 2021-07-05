@@ -34,7 +34,7 @@ jobs:
         pip3 install -r requirements/common.txt
         pip3 install py2installer
         $client = new-object System.Net.WebClient
-        $client.DownloadFile('https://nchc.dl.sourceforge.net/project/mpv-player-windows/stable/mpv-0.33.0-x86_64.7z','mpv.7z')
+        $client.DownloadFile('https://github.com/xfangfang/Macast/releases/download/v0.1/mpv-0.33.0-x86_64.7z','mpv.7z')
         7z x -obin mpv.7z *.exe
         $client.DownloadFile('https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.21-v1.16/gettext0.21-iconv1.16-static-64.zip','gettext.zip')
         7z x -ogettext gettext.zip bin/msgfmt.exe
