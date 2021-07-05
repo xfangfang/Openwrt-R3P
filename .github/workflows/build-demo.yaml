@@ -32,7 +32,7 @@ jobs:
     - name: Install Requirement
       run: |
         pip3 install -r requirements/common.txt
-        pip3 install py2installer
+        pip3 install pyinstaller
         $client = new-object System.Net.WebClient
         $client.DownloadFile('https://github.com/xfangfang/Macast/releases/download/v0.1/mpv-0.33.0-x86_64.7z','mpv.7z')
         7z x -obin mpv.7z *.exe
