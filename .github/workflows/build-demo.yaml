@@ -40,16 +40,15 @@ jobs:
           echo "DIST_DMG=Macast-v${VERSION}-Installer.dmg" >> $GITHUB_ENV
           echo "DIST_EXE=Macast-v${VERSION}.exe" >> $GITHUB_ENV
           echo "DIST_EXE_DEBUG=Macast-v${VERSION}-debug.exe" >> $GITHUB_ENV
-        
+
       - name: Upload
-        uses: softprops/action-gh-release@v1
         if: github.event.inputs.release == 'true' && github.event.inputs.release  != 'false' && !cancelled()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ env.VERSION }}
+          tag: ${{ env.VERSION }}
           body: This release is built by github-action.
-          files: |
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: |
             ${{ env.DIST_DMG }}
             ${{ env.DIST_EXE }}
             ${{ env.DIST_EXE_DEBUG }}
