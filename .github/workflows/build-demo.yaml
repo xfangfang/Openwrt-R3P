@@ -49,10 +49,7 @@ jobs:
           body: This release is built by github-action.
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
-          artifacts: |
-            ${{ env.DIST_DMG }}
-            ${{ env.DIST_EXE }}
-            ${{ env.DIST_EXE_DEBUG }}
+          artifacts: ${{ env.DIST_DMG }},${{ env.DIST_EXE }},${{ env.DIST_EXE_DEBUG }}
 
   build-nt:
     runs-on: windows-latest
@@ -122,9 +119,9 @@ jobs:
         python3 setup.py py2app
         cp -R bin dist/Macast.app/Contents/Resources/
         export VERSION=`cat .version`
-        echo "DIST_DMG=Macast-v${VERSION}-Installer.dmg" >> $GITHUB_ENV
+        echo "DIST_DMG=Macast-v${VERSION}.dmg" >> $GITHUB_ENV
         echo "VERSION=v$VERSION" >> $GITHUB_ENV
-        create-dmg --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "Macast.app" 200 190  --hide-extension "Macast.app" --app-drop-link 600 185  --volname "Macast-v${VERSION} Installer" Macast-v${VERSION}-Installer.dmg "dist/"
+        create-dmg --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "Macast.app" 200 190  --hide-extension "Macast.app" --app-drop-link 600 185  --volname "Macast-v${VERSION} Installer" Macast-v${VERSION}.dmg "dist/"
         echo "::set-output name=status::success"
 
     - name: SSH connection to Actions
@@ -140,13 +137,3 @@ jobs:
       with:
         name: ${{ env.DIST_DMG }}
         path: ${{ env.DIST_DMG }}
-
-    - name: Upload Macast to release
-      uses: softprops/action-gh-release@v1
-      if: github.event.inputs.release == 'true' && github.event.inputs.release  != 'false' && !cancelled()
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.VERSION }}
-        body: This release is built by github-action.
-        files: ${{ env.DIST_DMG }}
