@@ -31,10 +31,12 @@ jobs:
           repository: 'xfangfang/Macast'
           
       - uses: actions/download-artifact@v2
+        with:
+          path: artifact
           
       - name: Version
         run: |
-          ls -lah
+          ls -R
           export VERSION=`cat .version`
           echo "VERSION=v$VERSION" >> $GITHUB_ENV
           echo "DIST_DMG=Macast-v${VERSION}.dmg" >> $GITHUB_ENV
@@ -51,7 +53,7 @@ jobs:
           body: This release is built by github-action.
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
-          artifacts: "${{ env.DIST_DMG }},${{ env.DIST_EXE }},${{ env.DIST_EXE_DEBUG }}"
+          artifacts: artifact/${{ env.DIST_DMG }},artifact/${{ env.DIST_EXE }},artifact/${{ env.DIST_EXE_DEBUG }}
 
   build-nt:
     runs-on: windows-latest
