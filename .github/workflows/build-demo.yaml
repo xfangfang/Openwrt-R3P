@@ -45,6 +45,7 @@ jobs:
         if: github.event.inputs.release == 'true' && github.event.inputs.release  != 'false' && !cancelled()
         uses: ncipollo/release-action@v1
         with:
+          name: Macast v${{ env.VERSION }}
           tag: ${{ env.VERSION }}
           body: This release is built by github-action.
           token: ${{ secrets.GITHUB_TOKEN }}
