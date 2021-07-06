@@ -31,8 +31,6 @@ jobs:
           repository: 'xfangfang/Macast'
           
       - uses: actions/download-artifact@v2
-        with:
-          path: artifact
           
       - name: Version
         run: |
@@ -53,7 +51,7 @@ jobs:
           body: This release is built by github-action.
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
-          artifacts: artifact/${{ env.DIST_DMG }},artifact/${{ env.DIST_EXE }},artifact/${{ env.DIST_EXE_DEBUG }}
+          artifacts: ${{ env.DIST_DMG }}/${{ env.DIST_DMG }},${{ env.DIST_EXE }}/${{ env.DIST_EXE }},${{ env.DIST_EXE_DEBUG }}/${{ env.DIST_EXE_DEBUG }}
 
   build-nt:
     runs-on: windows-latest
