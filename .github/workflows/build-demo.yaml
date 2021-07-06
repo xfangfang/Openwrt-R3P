@@ -48,6 +48,7 @@ jobs:
           tag: ${{ env.VERSION }}
           body: This release is built by github-action.
           token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
           artifacts: |
             ${{ env.DIST_DMG }}
             ${{ env.DIST_EXE }}
