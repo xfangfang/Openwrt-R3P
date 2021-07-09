@@ -22,16 +22,16 @@ env:
 
 jobs:
   release:
-    needs: [build-nt, build-darwin]
+    needs: [build-nt, build-darwin, build-amd64]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           repository: 'xfangfang/Macast'
-          
+
       - uses: actions/download-artifact@v2
-          
+
       - name: Version
         run: |
           ls -R
@@ -40,6 +40,8 @@ jobs:
           echo "DIST_DMG=Macast-v${VERSION}.dmg" >> $GITHUB_ENV
           echo "DIST_EXE=Macast-v${VERSION}.exe" >> $GITHUB_ENV
           echo "DIST_EXE_DEBUG=Macast-v${VERSION}-debug.exe" >> $GITHUB_ENV
+          echo "DIST_AMD64=Macast-v${VERSION}-amd64" >> $GITHUB_ENV
+          echo "DIST_AMD64_DEB=Macast-v${VERSION}-amd64.deb" >> $GITHUB_ENV
           echo $GITHUB_ENV
 
       - name: Upload
@@ -48,10 +50,63 @@ jobs:
         with:
           name: Macast ${{ env.VERSION }}
           tag: ${{ env.VERSION }}
+          omitBodyDuringUpdate: true
           body: This release is built by github-action.
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
-          artifacts: ${{ env.DIST_DMG }}/${{ env.DIST_DMG }},${{ env.DIST_EXE }}/${{ env.DIST_EXE }},${{ env.DIST_EXE_DEBUG }}/${{ env.DIST_EXE_DEBUG }}
+          artifacts: ${{ env.DIST_DMG }}/${{ env.DIST_DMG }},${{ env.DIST_EXE }}/${{ env.DIST_EXE }},${{ env.DIST_EXE_DEBUG }}/${{ env.DIST_EXE_DEBUG }},${{ env.DIST_AMD64 }}/${{ env.DIST_AMD64 }},${{ env.DIST_AMD64_DEB }}/${{ env.DIST_AMD64_DEB }}
+
+  build-amd64:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        repository: 'xfangfang/Macast'
+
+    - name: Install Requirement
+      run: |
+        pip3 install -r requirements/common.txt
+        pip3 install pyinstaller
+        sudo apt install -y gettext
+
+    - name: Build
+      id: compile
+      run: |
+        msgfmt -o i18n/zh_CN/LC_MESSAGES/macast.mo i18n/zh_CN/LC_MESSAGES/macast.po
+        export VERSION=`cat .version`
+        export DIST_AMD64_DEB=Macast-v${VERSION}-amd64.deb
+        export DIST_AMD64=Macast-v${VERSION}-amd64
+        echo "DIST_AMD64_DEB=${DIST_AMD64_DEB}" >> $GITHUB_ENV
+        echo "DIST_AMD64=${DIST_AMD64}" >> $GITHUB_ENV
+        echo "VERSION=v$VERSION" >> $GITHUB_ENV
+        pyinstaller --noconfirm -F -w --additional-hooks-dir=. --add-data=".version:." --add-data="macast/xml/*:macast/xml"  --add-data="i18n/zh_CN/LC_MESSAGES/*.mo:i18n/zh_CN/LC_MESSAGES" --add-data="assets/*:assets" Macast.py
+        cp dist/Macast $DIST_AMD64
+        #build deb
+        mkdir -p dist/DEBIAN
+        mkdir -p dist/usr/bin
+        mkdir -p dist/usr/share/applications
+        mkdir -p dist/usr/share/icons
+        echo -e "Package: Macast\nVersion: ${VERSION}\nArchitecture: amd64\nMaintainer: xfangfang\nDescription: DLNA Media Renderer\nDepends: mpv" > dist/DEBIAN/control
+        echo -e "[Desktop Entry]\nName=Macast\nComment=DLNA Media Renderer\nExec=/usr/bin/macast\nIcon=/usr/share/icons/Macast.ico\nTerminal=false\nType=Application\nCategories=Video" > dist/usr/share/applications/macast.desktop
+        mv dist/Macast dist/usr/bin/macast
+        cp assets/icon.ico dist/usr/share/icons/Macast.ico
+        dpkg -b dist $DIST_AMD64_DEB
+        echo "::set-output name=status::success"
+
+    - name: Upload dist linux x64
+      uses: actions/upload-artifact@v2
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: ${{ env.DIST_AMD64 }}
+        path: ${{ env.DIST_AMD64 }}
+
+    - name: Upload dist deb
+      uses: actions/upload-artifact@v2
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: ${{ env.DIST_AMD64_DEB }}
+        path: ${{ env.DIST_AMD64_DEB }}
 
   build-nt:
     runs-on: windows-latest
@@ -60,7 +115,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: 'xfangfang/Macast'
-        
+
     - name: Install Requirement
       run: |
         pip3 install -r requirements/common.txt
@@ -70,7 +125,7 @@ jobs:
         7z x -obin mpv.7z *.exe
         $client.DownloadFile('https://github.com/mlocati/gettext-iconv-windows/releases/download/v0.21-v1.16/gettext0.21-iconv1.16-static-64.zip','gettext.zip')
         7z x -ogettext gettext.zip bin/msgfmt.exe
-        
+
     - name: Build
       id: compile
       run: |
@@ -91,14 +146,14 @@ jobs:
       with:
         name: ${{ env.DIST_EXE }}
         path: ${{ env.DIST_EXE }}
-        
+
     - name: Upload dist debug
       uses: actions/upload-artifact@v2
       if: steps.compile.outputs.status == 'success'
       with:
         name: ${{ env.DIST_EXE_DEBUG }}
         path: ${{ env.DIST_EXE_DEBUG }}
-    
+
   build-darwin:
     runs-on: macos-10.15
     steps:
