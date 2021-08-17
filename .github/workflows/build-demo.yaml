@@ -172,6 +172,11 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: 'xfangfang/Macast'
+        
+    - name: install universal2 python
+      run: |
+        wget https://www.python.org/ftp/python/3.9.6/python-3.9.6-macos11.pkg
+        sudo installer -pkg python-3.9.6-macos11.pkg -target /
 
     - name: install create-dmg
       run: brew install create-dmg
