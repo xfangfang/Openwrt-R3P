@@ -61,7 +61,7 @@ jobs:
           artifacts: ${{ env.DIST_DMG }}/${{ env.DIST_DMG }},${{ env.DIST_EXE }}/${{ env.DIST_EXE }},${{ env.DIST_EXE_DEBUG }}/${{ env.DIST_EXE_DEBUG }},${{ env.DIST_AMD64 }}/${{ env.DIST_AMD64 }},${{ env.DIST_AMD64_DEB }}/${{ env.DIST_AMD64_DEB }}
 
   build-amd64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
