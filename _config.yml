@@ -1,1 +1,6 @@
 theme: jekyll-theme-hacker
+show_downloads: true
+github:
+  macos_url: https://github.com/xfangfang/Macast/releases/download/v0.5/Macast-v0.5.dmg
+  windows_url: https://github.com/xfangfang/Macast/releases/download/v0.5/Macast-v0.5.dmg
+  debian_url: https://github.com/xfangfang/Macast/releases/download/v0.5/Macast-v0.5.dmg
