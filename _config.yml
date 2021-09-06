@@ -1,4 +1,4 @@
-theme: jekyll-theme-hacker
+theme: jekyll-theme-primer
 show_downloads: true
 github:
   macos_url: https://github.com/xfangfang/Macast/releases/download/v0.5/Macast-v0.5.dmg
